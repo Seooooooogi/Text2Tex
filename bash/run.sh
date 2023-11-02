@@ -18,5 +18,5 @@ python scripts/generate_texture.py \
     --update_mode heuristic \
     --seed 42 \
     --post_process \
-    --device "2080" \
+    --device "4090" \
     --use_objaverse # assume the mesh is normalized with y-axis as up

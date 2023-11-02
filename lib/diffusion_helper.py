@@ -30,12 +30,14 @@ def get_controlnet_depth():
 def get_inpainting(device):
     print("=> initializing Inpainting...")
 
-    model = StableDiffusionInpaintPipeline.from_pretrained(
+    pipe = StableDiffusionInpaintPipeline.from_pretrained(
         "stabilityai/stable-diffusion-2-inpainting",
         torch_dtype=torch.float16,
     ).to(device)
+    
+    ip_model = IPAdapter(pipe, "./models/image_encoder/", "./models/ip-adapter_sd15.bin", device)
 
-    return model
+    return ip_model
 
 def get_text2image(device):
     print("=> initializing Inpainting...")
@@ -77,6 +79,9 @@ def apply_controlnet_depth(model, ddim_sampler,
         ddim_steps, guidance_scale, seed, eta, 
         strength=strength, detected_map=depth_map_np, unknown_mask=np.array(generate_mask_image), save_memory=save_memory
     )[0]
+    
+    prompt += a_prompt
+    diffused_image_np = ip_model.generate(image, prompt, n_prompt, scale, num_samples, seed, guidance_scale)
 
     init_image = init_image.convert("RGB")
     diffused_image = Image.fromarray(diffused_image_np).convert("RGB")
